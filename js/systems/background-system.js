@@ -6,12 +6,6 @@ export default class BackgroundSystem extends System {
     this.backgroundComponent = backgroundComponent;
   }
 
-  draw(ctx) {
-    this.backgroundComponent.images.forEach((image) => {
-      ctx.drawImage(image.image, image.x, image.y);
-    });
-  }
-
   update() {
     this.backgroundComponent.images.forEach((image) => {
       image.x -= this.backgroundComponent.moveSpeed;

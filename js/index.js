@@ -1,23 +1,10 @@
+import EntityManager from "./entity-manager.js";
 import PlayerEntity from "./entities/player-entity.js";
 import BackgroundComponent from "./components/background-component.js";
 import RenderingSystem from "./systems/rendering-system.js";
 import AnimationSystem from "./systems/animation-system.js";
 import BackgroundSystem from "./systems/background-system.js";
-
-const loadImages = (images) => {
-  return new Promise((resolve) => {
-    let loadedImages = 0;
-
-    images.forEach((image) => {
-      image.onload = () => {
-        loadedImages++;
-        if (loadedImages === images.length) {
-          resolve();
-        }
-      };
-    });
-  });
-};
+import { loadImages } from "./utils/image-loader.js";
 
 const initialize = () => {
   const canvas = document.createElement("canvas");
@@ -29,43 +16,51 @@ const initialize = () => {
   canvas.height = canvasHeight;
   document.body.append(canvas);
 
-  const entities = [];
-
-  const player = new PlayerEntity(ctx);
-
-  entities.push(player);
+  const entityManager = new EntityManager();
 
   const renderingSystem = new RenderingSystem();
   const animationSystem = new AnimationSystem();
 
-  const image1 = new Image();
-  const image2 = new Image();
-  const image3 = new Image();
+  const playerImages = ["Ship01.png", "Ship02.png", "Ship03.png", "Ship04.png"];
+  loadImages(playerImages).then((playerImages) => {
+    const player = new PlayerEntity(ctx, playerImages);
+    entityManager.addEntity(player);
+  });
 
-  image1.src = "images/Farback01.png";
-  image2.src = "images/Farback02.png";
-  image3.src = "images/Stars.png";
-
-  loadImages([image1, image2, image3]).then(() => {
+  const backgroundImages = ["Farback01.png", "Farback02.png", "Stars.png"];
+  loadImages(backgroundImages).then((backgroundImages) => {
     const background = [
-      new BackgroundSystem(new BackgroundComponent([image1, image2], 0.6, 0)),
-      new BackgroundSystem(new BackgroundComponent([image3, image3], 1.2, 0)),
+      new BackgroundSystem(
+        new BackgroundComponent(
+          [backgroundImages[0], backgroundImages[1]],
+          0.6,
+          0
+        )
+      ),
+      new BackgroundSystem(
+        new BackgroundComponent(
+          [backgroundImages[2], backgroundImages[2]],
+          1.2,
+          0
+        )
+      ),
     ];
-    mainLoop(entities, animationSystem, renderingSystem, ctx, background);
+
+    mainLoop(entityManager, renderingSystem, animationSystem, ctx, background);
   });
 };
 
 const mainLoop = (
-  entities,
-  animationSystem,
+  entityManager,
   renderingSystem,
+  animationSystem,
   ctx,
   background
 ) => {
-  animationSystem.update(entities);
-  renderingSystem.update(entities, ctx, background);
+  animationSystem.update(entityManager.entities);
+  renderingSystem.update(entityManager.entities, ctx, background);
   requestAnimationFrame(() =>
-    mainLoop(entities, animationSystem, renderingSystem, ctx, background)
+    mainLoop(entityManager, renderingSystem, animationSystem, ctx, background)
   );
 };
 
