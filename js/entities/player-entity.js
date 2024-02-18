@@ -2,7 +2,8 @@ import Entity from "./entity.js";
 import SpriteComponent from "../components/sprite-component.js";
 import AnimationComponent from "../components/animation-component.js";
 import PositionComponent from "../components/position-component.js";
-import { loadImages } from "../utils/image-loader.js";
+import VelocityComponent from "../components/velocity-component.js";
+import InputComponent from "../components/input-component.js";
 
 export default class PlayerEntity extends Entity {
   constructor(ctx, images) {
@@ -21,10 +22,14 @@ export default class PlayerEntity extends Entity {
       100,
       (ctx.canvas.height - scaledHeight) / 2
     );
+    const velocityComponent = new VelocityComponent();
+    const inputComponent = new InputComponent();
 
-    this.addComponent(animationComponent);
     this.addComponent(spriteComponent);
+    this.addComponent(animationComponent);
     this.addComponent(positionComponent);
+    this.addComponent(velocityComponent);
+    this.addComponent(inputComponent);
     this.addComponent({ Player: true });
   }
 }

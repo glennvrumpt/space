@@ -4,6 +4,7 @@ import BackgroundComponent from "./components/background-component.js";
 import RenderingSystem from "./systems/rendering-system.js";
 import AnimationSystem from "./systems/animation-system.js";
 import BackgroundSystem from "./systems/background-system.js";
+import PhysicsSystem from "./systems/physics-system.js";
 import { loadImages } from "./utils/image-loader.js";
 
 const initialize = () => {
@@ -20,6 +21,7 @@ const initialize = () => {
 
   const renderingSystem = new RenderingSystem();
   const animationSystem = new AnimationSystem();
+  const physicsSystem = new PhysicsSystem();
 
   const playerImages = ["Ship01.png", "Ship02.png", "Ship03.png", "Ship04.png"];
   loadImages(playerImages).then((playerImages) => {
@@ -46,7 +48,14 @@ const initialize = () => {
       ),
     ];
 
-    mainLoop(entityManager, renderingSystem, animationSystem, ctx, background);
+    mainLoop(
+      entityManager,
+      renderingSystem,
+      animationSystem,
+      physicsSystem,
+      ctx,
+      background
+    );
   });
 };
 
@@ -54,13 +63,29 @@ const mainLoop = (
   entityManager,
   renderingSystem,
   animationSystem,
+  physicsSystem,
   ctx,
-  background
+  background,
+  lastTimestamp
 ) => {
+  const timestamp = performance.now();
+  const deltaTime = (timestamp - lastTimestamp) / 1000;
+  lastTimestamp = timestamp;
+
+  physicsSystem.update(entityManager.entities, deltaTime);
   animationSystem.update(entityManager.entities);
   renderingSystem.update(entityManager.entities, ctx, background);
+
   requestAnimationFrame(() =>
-    mainLoop(entityManager, renderingSystem, animationSystem, ctx, background)
+    mainLoop(
+      entityManager,
+      renderingSystem,
+      animationSystem,
+      physicsSystem,
+      ctx,
+      background,
+      lastTimestamp
+    )
   );
 };
 
