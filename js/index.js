@@ -4,10 +4,11 @@ import BackgroundComponent from "./components/background-component.js";
 import RenderingSystem from "./systems/rendering-system.js";
 import AnimationSystem from "./systems/animation-system.js";
 import BackgroundSystem from "./systems/background-system.js";
-import PhysicsSystem from "./systems/physics-system.js";
+import MovementSystem from "./systems/movement-system.js";
+import CollisionSystem from "./systems/collision-system.js";
 import { loadImages } from "./utils/image-loader.js";
 
-const initialize = () => {
+const initializeCanvas = () => {
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
   const canvasWidth = 1024;
@@ -17,11 +18,22 @@ const initialize = () => {
   canvas.height = canvasHeight;
   document.body.append(canvas);
 
-  const entityManager = new EntityManager();
+  return ctx;
+};
 
+const initializeSystems = () => {
   const renderingSystem = new RenderingSystem();
   const animationSystem = new AnimationSystem();
-  const physicsSystem = new PhysicsSystem();
+  const movementSystem = new MovementSystem();
+  const collisionSystem = new CollisionSystem();
+
+  return { renderingSystem, animationSystem, movementSystem, collisionSystem };
+};
+
+const initialize = () => {
+  const ctx = initializeCanvas();
+  const entityManager = new EntityManager();
+  const systems = initializeSystems();
 
   const playerImages = ["Ship01.png", "Ship02.png", "Ship03.png", "Ship04.png"];
   loadImages(playerImages).then((playerImages) => {
@@ -48,44 +60,22 @@ const initialize = () => {
       ),
     ];
 
-    mainLoop(
-      entityManager,
-      renderingSystem,
-      animationSystem,
-      physicsSystem,
-      ctx,
-      background
-    );
+    mainLoop(entityManager, systems, ctx, background);
   });
 };
 
-const mainLoop = (
-  entityManager,
-  renderingSystem,
-  animationSystem,
-  physicsSystem,
-  ctx,
-  background,
-  lastTimestamp
-) => {
+const mainLoop = (entityManager, systems, ctx, background, lastTimestamp) => {
   const timestamp = performance.now();
   const deltaTime = (timestamp - lastTimestamp) / 1000;
   lastTimestamp = timestamp;
 
-  physicsSystem.update(entityManager.entities, deltaTime);
-  animationSystem.update(entityManager.entities);
-  renderingSystem.update(entityManager.entities, ctx, background);
+  systems.movementSystem.update(entityManager.entities, deltaTime);
+  systems.collisionSystem.update(entityManager.entities, ctx.canvas);
+  systems.animationSystem.update(entityManager.entities);
+  systems.renderingSystem.update(entityManager.entities, ctx, background);
 
   requestAnimationFrame(() =>
-    mainLoop(
-      entityManager,
-      renderingSystem,
-      animationSystem,
-      physicsSystem,
-      ctx,
-      background,
-      lastTimestamp
-    )
+    mainLoop(entityManager, systems, ctx, background, lastTimestamp)
   );
 };
 

@@ -6,24 +6,25 @@ export default class PhysicsSystem extends System {
       const inputComponent = entity.getComponent("InputComponent");
       const positionComponent = entity.getComponent("PositionComponent");
       const velocityComponent = entity.getComponent("VelocityComponent");
+      const inputManager = inputComponent.inputManager;
 
       velocityComponent.x = 0;
       velocityComponent.y = 0;
 
-      if (inputComponent.keys["w"]) {
+      if (inputManager.keys["w"]) {
         velocityComponent.y = -300 * deltaTime;
       }
 
-      if (inputComponent.keys["s"]) {
+      if (inputManager.keys["s"]) {
         velocityComponent.y = 300 * deltaTime;
       }
 
-      if (inputComponent.keys["d"]) {
-        velocityComponent.x = 300 * deltaTime;
+      if (inputManager.keys["a"]) {
+        velocityComponent.x = -300 * deltaTime;
       }
 
-      if (inputComponent.keys["a"]) {
-        velocityComponent.x = -300 * deltaTime;
+      if (inputManager.keys["d"]) {
+        velocityComponent.x = 300 * deltaTime;
       }
 
       positionComponent.x += velocityComponent.x;
