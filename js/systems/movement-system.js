@@ -1,6 +1,6 @@
 import System from "./system.js";
 
-export default class PhysicsSystem extends System {
+export default class MovementSystem extends System {
   update(entities, deltaTime) {
     entities.forEach((entity) => {
       const inputComponent = entity.getComponent("InputComponent");
